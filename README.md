@@ -21,6 +21,8 @@ El objetivo de este laboratorio es construir una máquina de prácticas aislada 
 
 Antes de encender la máquina por primera vez se verificó que el Adaptador 1 estuviera conectado en modo NAT.
 
+![Adaptador 1 conectado en modo NAT](capturas/01-red-nat.png)
+
 En modo NAT, VirtualBox actúa como un router privado entre la VM y la red real. La VM recibe una dirección IP interna que solo existe dentro de VirtualBox, y todo su tráfico sale a Internet con la dirección del host. Esto tiene tres consecuencias de seguridad:
 
 - **La VM es invisible en la red de casa u oficina:** ningún otro dispositivo del Wi-Fi puede iniciar una conexión porque no tiene una IP propia en esa red.
@@ -32,6 +34,12 @@ El modo que se evitó fue **Bridge**: en ese modo la VM se conecta a la red fís
 ## 2. Capa de usuarios: separación de privilegios
 
 Durante la instalación se creó la cuenta `hannah`, que queda como **Administrador** (puede usar `sudo`). Después se creó una segunda cuenta, el usuario `Practica-coder`, de tipo **Estándar**, que es la que se usa para el trabajo diario del laboratorio.
+
+![Usuarios del sistema: hannah y Practica-coder](capturas/02-usuarios.png)
+
+![Practica-coder como usuario estándar (sin Administrador)](capturas/03-usuario-estandar.png)
+
+![Grupos de cada usuario: hannah está en sudo, practica-coder no](capturas/04-grupos.png)
 
 Es la aplicación del **principio de mínimo privilegio**: cada usuario o proceso debe tener solo los permisos imprescindibles para su tarea. Si se trabaja siempre como administrador por comodidad, cualquier programa malicioso o comando equivocado se ejecuta con control total del sistema. Con un usuario estándar, si hay un error o un malware, queda limitado a los archivos de ese usuario.
 
@@ -47,6 +55,8 @@ chmod 640 notas-lab
 ls -l notas-lab
 ```
 
+![Resultado de ls -l sobre notas-lab](capturas/05-permisos-ls.png)
+
 La cadena de permisos `-rw-r-----` se lee en tres bloques: el dueño puede leer y escribir (`rw-`), el grupo solo puede leer (`r--`) y el resto de los usuarios no tiene ningún acceso (`---`). En notación octal es **640** (6 = 4+2 lectura+escritura, 4 = lectura, 0 = nada).
 
 ### B. Actualización del sistema
@@ -58,6 +68,10 @@ sudo apt update
 sudo apt upgrade -y
 ```
 
+![sudo apt update](capturas/06-apt-update.png)
+
+![sudo apt upgrade](capturas/07-apt-upgrade.png)
+
 `apt update` descarga la lista más reciente de paquetes disponibles; `apt upgrade` instala las nuevas versiones. Mantener el sistema actualizado cierra vulnerabilidades ya conocidas, que son las que más explotan los atacantes porque cualquiera puede consultarlas.
 
 ## 4. La red de seguridad: snapshot inicial
@@ -66,11 +80,15 @@ Con el sistema instalado, actualizado y con los usuarios configurados, se apagó
 
 En la descripción del snapshot se dejó registrado qué incluye este punto de restauración: Ubuntu actualizado, red NAT, usuario estándar separado del administrador y escritorio remoto deshabilitado.
 
+![Snapshot "Clean Install - Hardening applied" en VirtualBox](capturas/08-snapshot.png)
+
 El snapshot funciona como una máquina del tiempo: guarda el estado exacto del disco y la configuración de la VM en un momento conocido y limpio. Si en una práctica futura se rompe algo, se instala una herramienta que deja el sistema inestable o se infecta la máquina, se puede volver a este punto en segundos, sin reinstalar nada. También permite experimentar con más libertad, sabiendo que existe un estado seguro al que regresar.
 
 ### Hardening adicional: servicios innecesarios desactivados
 
 Siguiendo el paso 4 de la consigna, se verificó en **Configuración → Sistema → Escritorio remoto** que la compartición de escritorio y el control remoto estén apagados. Un servicio de acceso remoto que no se usa es una puerta de entrada innecesaria: cada servicio activo amplía la superficie de ataque.
+
+![Compartición de escritorio y control remoto desactivados](capturas/09-escritorio-remoto.png)
 
 ## Conclusión
 
